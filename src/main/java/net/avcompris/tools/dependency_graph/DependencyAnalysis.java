@@ -60,6 +60,11 @@ public class DependencyAnalysis {
 						"Module array should not contain any null value.");
 			}
 
+			if (map.containsKey(module.name)) {
+				throw new IllegalArgumentException("Duplicate module name: \""
+						+ module.name + "\"");
+			}
+
 			map.put(module.name, module);
 		}
 
