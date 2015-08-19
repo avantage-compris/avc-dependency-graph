@@ -75,6 +75,10 @@ public class DependencyAnalysis {
 
 		checkNotNull(modules, "modules");
 
+		// --------------------------------------------------------------------- 
+		//     SANITY CHECKS
+		// --------------------------------------------------------------------- 
+
 		for (final Map.Entry<String, Module> entry : modules.entrySet()) {
 
 			final String name = entry.getKey();
@@ -85,6 +89,35 @@ public class DependencyAnalysis {
 						+ name + "\", but has name: \"" + name + "\"");
 			}
 		}
+
+		for (final Module module : modules.values()) {
+
+			for (final String downstream : module.getDownstreamModules()) {
+
+				if (!modules.containsKey(downstream)) {
+					throw new IllegalArgumentException(
+							"Module is declared as a downstream module (for \""
+									+ module.name
+									+ "\"), but cannot be found: \""
+									+ downstream + "\"");
+				}
+			}
+
+			for (final String upstream : module.getUpstreamModules()) {
+
+				if (!modules.containsKey(upstream)) {
+					throw new IllegalArgumentException(
+							"Module is declared as an upstream module (for \""
+									+ module.name
+									+ "\"), but cannot be found: \"" + upstream
+									+ "\"");
+				}
+			}
+		}
+
+		// --------------------------------------------------------------------- 
+		//     ANALYZE TREE
+		// --------------------------------------------------------------------- 
 
 		this.modules = ImmutableMap.copyOf(modules);
 
