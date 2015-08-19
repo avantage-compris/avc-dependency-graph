@@ -30,6 +30,12 @@ public class DependencyDiagrammer {
 
 		levelCount = analysis.sizeOfModuleLevels();
 
+		maxModuleCountOnAnyLevel = calculateMaxModuleCountOnAnyLevel(analysis);
+	}
+
+	private static int calculateMaxModuleCountOnAnyLevel(
+			final DependencyAnalysis analysis) {
+
 		int maxModuleCountOnAnyLevel = 1;
 
 		for (final Collection<String> modulesOnLevel : analysis
@@ -43,7 +49,7 @@ public class DependencyDiagrammer {
 			}
 		}
 
-		this.maxModuleCountOnAnyLevel = maxModuleCountOnAnyLevel;
+		return maxModuleCountOnAnyLevel;
 	}
 
 	private static final int WIDTH = 130;
@@ -684,7 +690,7 @@ public class DependencyDiagrammer {
 		}
 
 		// TODO multithread: ThreadPool(10), for instance
-		
+
 		for (final Integer r : remaining) {
 
 			posGrid[level][i] = (r == -1) ? null : r;
