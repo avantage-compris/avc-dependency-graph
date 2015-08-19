@@ -72,7 +72,7 @@
 	<name>avc-dependency-graph</name>
 	<description>
 		An ad hoc tool to generate SVG diagrams of dependencies between, say,
-		Maven projects, or Jenkins jobs.
+		Maven projects, or beetween Jenkins jobs.
 	</description>
 	<url>https://github.com/avantage-compris/avc-dependency-graph</url>
 	
