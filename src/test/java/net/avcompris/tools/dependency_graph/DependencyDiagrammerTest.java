@@ -68,4 +68,16 @@ public class DependencyDiagrammerTest {
 
 		assertDontCross(line(495, 210, 215, 249), line(75, 150, 75, 309));
 	}
+
+	@Test
+	public void testLinesCrossVertical1() throws Exception {
+
+		assertCross(line(10, 10, 10, 100), line(10, 10, 10, 50));
+	}
+
+	@Test
+	public void testLinesCrossVertical2() throws Exception {
+
+		assertCross(line(10, 50, 10, 100), line(10, 10, 10, 100));
+	}
 }

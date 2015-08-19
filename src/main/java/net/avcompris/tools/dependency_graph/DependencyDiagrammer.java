@@ -49,10 +49,22 @@ public class DependencyDiagrammer {
 			}
 		}
 
-		return maxModuleCountOnAnyLevel;
+		switch (maxModuleCountOnAnyLevel) {
+
+		case 0:
+		case 1:
+		case 2:
+		case 3:
+
+			return maxModuleCountOnAnyLevel + 1; // give more room
+
+		default:
+
+			return maxModuleCountOnAnyLevel;
+		}
 	}
 
-	private static final int WIDTH = 130;
+	private static final int WIDTH = 150; // TODO parameterize this
 	private static final int HEIGHT = 20;
 	private static final int V_SPACE = 40;
 
@@ -246,7 +258,7 @@ public class DependencyDiagrammer {
 	private DiagramMetrics calculateMetrics(
 			final Map<String, ModulePosition> modulePoss) {
 
-		int howManyLinesCross = 0;
+		double howManyLinesCross = 0;
 		double slopeScore = 0.0;
 
 		final Iterable<Line> lines = calculateLines(modulePoss);
@@ -300,19 +312,26 @@ public class DependencyDiagrammer {
 		return Math.signum(dx1) == Math.signum(dx2);
 	}
 
+	/**
+	 * return a weight, or 0.0 if the lines do not cross.
+	 */
 	static boolean linesCross(final Line line1, final Line line2) {
 
 		if (line1 == line2 || line1.y2 <= line2.y1 || line2.y2 <= line1.y1) {
 			return false;
 		}
 
-		if (line1.x1 == line2.x1 && line1.y1 == line2.y1) {
+		if (line1.equals(line2)) {
 
-			return false;
+			return true;
+
+		} else if (line1.x1 == line2.x1 && line1.y1 == line2.y1) {
+
+			return line1.hasSameSlope(line2);
 
 		} else if (line1.x2 == line2.x2 && line1.y2 == line2.y2) {
 
-			return false;
+			return line1.hasSameSlope(line2);
 
 		} else if (line1.y1 == line2.y1) {
 
@@ -414,12 +433,12 @@ public class DependencyDiagrammer {
 
 	private static class DiagramMetrics {
 
-		public final int howManyLinesCross;
+		public final double howManyLinesCross;
 		public final double slopeScore;
 		public final double xWeight;
 
 		public DiagramMetrics(
-				final int howManyLinesCross,
+				final double howManyLinesCross,
 				final double slopeScore,
 				final double xWeight) {
 
@@ -513,6 +532,12 @@ public class DependencyDiagrammer {
 				this.x2 = x1;
 				this.y2 = y1;
 
+			} else if (y1 == y2) {
+
+				throw new IllegalArgumentException(
+						"y1 should always be different than y2, but was: ("
+								+ x1 + "," + y1 + ")-(" + x2 + "," + y2 + ")");
+
 			} else {
 
 				this.x1 = x1;
@@ -520,6 +545,33 @@ public class DependencyDiagrammer {
 				this.x2 = x2;
 				this.y2 = y2;
 			}
+		}
+
+		@Override
+		public int hashCode() {
+
+			return x1 + x2 + y1 + y2;
+		}
+
+		@Override
+		public boolean equals(@Nullable final Object o) {
+
+			if (o == null || !Line.class.equals(o)) {
+				return false;
+			}
+
+			final Line line = (Line) o;
+
+			return x1 == line.x1 && y1 == line.y1 && x2 == line.x2
+					&& y2 == line.y2;
+		}
+
+		public boolean hasSameSlope(final Line line) {
+
+			checkNotNull(line, "line");
+
+			return (line.x2 - line.x1) * (y2 - y1) == (x2 - x1)
+					* (line.y2 - line.y1);
 		}
 	}
 
@@ -581,9 +633,7 @@ public class DependencyDiagrammer {
 
 			if (System.currentTimeMillis() > next) {
 
-				System.out.println(count + ", level: " + level + "/"
-						+ levelCount + ", pos: " + i + "/"
-						+ maxModuleCountOnAnyLevel + "...");
+				System.out.println(count + "...");
 
 				next = System.currentTimeMillis() + DELAY;
 			}

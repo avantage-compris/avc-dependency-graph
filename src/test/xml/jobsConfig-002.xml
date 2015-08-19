@@ -1,0 +1,56 @@
+<jobConfigs>
+	<jobConfig jobName="avc-dbqueries">
+		<name>avc-dbqueries</name>
+		<downstreamProject>
+			<name>avc-node-commons</name>
+		</downstreamProject>
+		<downstreamProject>
+			<name>avc-core-commons</name>
+		</downstreamProject>
+	</jobConfig>
+	<jobConfig jobName="avc-webapp-it-commons">
+		<name>avc-webapp-it-commons</name>
+	</jobConfig>
+	<jobConfig jobName="avc-manifest-commons">
+		<name>avc-manifest-commons</name>
+		<downstreamProject>
+			<name>avc-webapp-scenarios-plugin</name>
+		</downstreamProject>
+	</jobConfig>
+	<jobConfig jobName="avc-node-commons">
+		<name>avc-node-commons</name>
+		<downstreamProject>
+			<name>avc-workers-plugin</name>
+		</downstreamProject>
+	</jobConfig>
+	<jobConfig jobName="avc-core-commons">
+		<name>avc-core-commons</name>
+		<downstreamProject>
+			<name>avc-workers-commons</name>
+		</downstreamProject>
+		<downstreamProject>
+			<name>avc-webapp-commons</name>
+		</downstreamProject>
+		<downstreamProject>
+			<name>avc-dbdescribe</name>
+		</downstreamProject>
+	</jobConfig>
+	<jobConfig jobName="avc-webapp-scenarios-plugin">
+		<name>avc-webapp-scenarios-plugin</name>
+	</jobConfig>
+	<jobConfig jobName="avc-workers-commons">
+		<name>avc-workers-commons</name>
+		<downstreamProject>
+			<name>avc-workers-plugin</name>
+		</downstreamProject>
+	</jobConfig>
+	<jobConfig jobName="avc-webapp-commons">
+		<name>avc-webapp-commons</name>
+	</jobConfig>
+	<jobConfig jobName="avc-dbdescribe">
+		<name>avc-dbdescribe</name>
+	</jobConfig>
+	<jobConfig jobName="avc-workers-plugin">
+		<name>avc-workers-plugin</name>
+	</jobConfig>
+</jobConfigs>

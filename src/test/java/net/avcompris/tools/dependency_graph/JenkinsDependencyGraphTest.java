@@ -13,15 +13,12 @@ import org.junit.Test;
 
 public class JenkinsDependencyGraphTest {
 
-	@Test
-	public void testJenkinsDependencyGraph_001() throws Exception {
+	private static void generateDependencyGraph(final File file) throws Exception {
 
 		// 1. LOAD CONFIGS
 
 		final Map<String, JobXMLConfig> jobConfigs = DomBinderUtils
-				.xmlContentToJava(
-						new File("src/test/xml", "jobsConfig-001.xml"),
-						JobXMLConfigs.class).getJobConfigs();
+				.xmlContentToJava(file, JobXMLConfigs.class).getJobConfigs();
 
 		// 2. ANALYSIS
 
@@ -50,7 +47,19 @@ public class JenkinsDependencyGraphTest {
 		final boolean optimize = true;
 
 		new DependencyDiagrammer(analysis).drawTo(optimize, new File("target",
-				"JenkinsDependencyGraph_001.svg"));
+				file.getName().replace(".xml", ".svg")));
+	}
+
+	@Test
+	public void testJenkinsDependencyGraph_001() throws Exception {
+
+		generateDependencyGraph(new File("src/test/xml", "jobsConfig-001.xml"));
+	}
+
+	@Test
+	public void testJenkinsDependencyGraph_002() throws Exception {
+
+		generateDependencyGraph(new File("src/test/xml", "jobsConfig-002.xml"));
 	}
 
 	@XPath("/jobConfigs")
