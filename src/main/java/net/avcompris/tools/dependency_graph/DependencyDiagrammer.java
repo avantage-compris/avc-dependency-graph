@@ -581,7 +581,9 @@ public class DependencyDiagrammer {
 
 			if (System.currentTimeMillis() > next) {
 
-				System.out.println(count + "...");
+				System.out.println(count + ", level: " + level + "/"
+						+ levelCount + ", pos: " + i + "/"
+						+ maxModuleCountOnAnyLevel + "...");
 
 				next = System.currentTimeMillis() + DELAY;
 			}
