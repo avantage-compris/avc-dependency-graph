@@ -71,9 +71,13 @@ public class DependencyAnalysis {
 		return map;
 	}
 
-	public DependencyAnalysis(final Map<String, Module> modules) {
+	public DependencyAnalysis(final Map<String, Module> m) {
 
-		checkNotNull(modules, "modules");
+		checkNotNull(m, "modules");
+
+		this.modules = ImmutableMap.copyOf(m);
+
+		final int moduleCount = modules.size();
 
 		// --------------------------------------------------------------------- 
 		//     SANITY CHECKS
@@ -113,17 +117,17 @@ public class DependencyAnalysis {
 									+ "\"");
 				}
 			}
+
+			countTransitiveDownstreams(module);
+
+			countTransitiveUpstreams(module);
 		}
 
 		// --------------------------------------------------------------------- 
 		//     ANALYZE TREE
 		// --------------------------------------------------------------------- 
 
-		this.modules = ImmutableMap.copyOf(modules);
-
 		final Set<String> modulesAlreadyVisited = new HashSet<String>();
-
-		final int moduleCount = modules.size();
 
 		int i = 0; // For error detection
 
@@ -190,6 +194,78 @@ public class DependencyAnalysis {
 		}
 
 		System.out.println("---------------------------------------------");
+	}
+
+	private int countTransitiveDownstreams(final Module module) {
+
+		checkNotNull(module, "module");
+
+		return countTransitiveDownstreams(module.name, module.name,
+				modules.size());
+	}
+
+	private int countTransitiveUpstreams(final Module module) {
+
+		checkNotNull(module, "module");
+
+		return countTransitiveUpstreams(module.name, module.name,
+				modules.size());
+	}
+
+	private int countTransitiveDownstreams(final String initialModuleName,
+			final String currentModuleName, final int limit) {
+
+		checkNotNull(initialModuleName, "initialModuleName");
+		checkNotNull(currentModuleName, "currentModuleName");
+
+		if (limit <= 0) {
+			throw new ArrayIndexOutOfBoundsException(
+					"Unlimited transitive downstreams found (probably a cycle) for module: \""
+							+ initialModuleName + "\"");
+		}
+
+		int max = 0;
+
+		for (final String downstream : modules.get(currentModuleName)
+				.getDownstreamModules()) {
+
+			final int countTransitiveDownstreams = countTransitiveDownstreams(
+					initialModuleName, downstream, limit - 1);
+
+			if (countTransitiveDownstreams > max) {
+				max = countTransitiveDownstreams;
+			}
+		}
+
+		return max + 1;
+	}
+
+	private int countTransitiveUpstreams(final String initialModuleName,
+			final String currentModuleName, final int limit) {
+
+		checkNotNull(initialModuleName, "initialModuleName");
+		checkNotNull(currentModuleName, "currentModuleName");
+
+		if (limit <= 0) {
+			throw new ArrayIndexOutOfBoundsException(
+					"Unlimited transitive upstreams found (probably a cycle) for module: \""
+							+ initialModuleName + "\"");
+		}
+
+		int max = 0;
+
+		for (final String upstream : modules.get(currentModuleName)
+				.getUpstreamModules()) {
+
+			final int countTransitiveUpstreams = countTransitiveDownstreams(
+					initialModuleName, upstream, limit - 1);
+
+			if (countTransitiveUpstreams > max) {
+				max = countTransitiveUpstreams;
+			}
+		}
+
+		return max + 1;
 	}
 
 	private Map<String, Collection<String>> moduleDirectUpstreams = new HashMap<String, Collection<String>>();
