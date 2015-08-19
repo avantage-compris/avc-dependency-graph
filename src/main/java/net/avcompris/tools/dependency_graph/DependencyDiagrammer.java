@@ -258,7 +258,7 @@ public class DependencyDiagrammer {
 	private DiagramMetrics calculateMetrics(
 			final Map<String, ModulePosition> modulePoss) {
 
-		double howManyLinesCross = 0;
+		int howManyLinesCross = 0;
 		double slopeScore = 0.0;
 
 		final Iterable<Line> lines = calculateLines(modulePoss);
