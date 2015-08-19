@@ -30,22 +30,26 @@ public class Module {
 	 * add a dependency: This module is declared as depending
 	 * on an other module, named "downstreamModuleName"
 	 */
-	public void addToDownstreamModules(final String downstreamModuleName) {
+	public Module addToDownstreamModules(final String downstreamModuleName) {
 
 		checkNotNull(downstreamModuleName, "downstreamModuleName");
 
 		downstreamModules.add(downstreamModuleName);
+		
+		return this;
 	}
 
 	/**
 	 * add a reverse dependency: This module is declared as being a dependance
 	 * for on an other module, named "upstreamModuleName"
 	 */
-	public void addToUpstreamModules(final String upstreamModuleName) {
+	public Module addToUpstreamModules(final String upstreamModuleName) {
 
 		checkNotNull(upstreamModuleName, "upstreamModuleName");
 
 		upstreamModules.add(upstreamModuleName);
+		
+		return this;
 	}
 
 	public Iterable<String> getDownstreamModules() {
