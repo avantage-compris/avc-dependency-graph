@@ -5,6 +5,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.annotation.Nullable;
+
 /**
  * This class holds the dependency information that will be analyzed and
  * put into a diagram. 
@@ -54,5 +56,27 @@ public class Module {
 	public Iterable<String> getUpstreamModules() {
 
 		return upstreamModules;
+	}
+
+	@Override
+	public int hashCode() {
+
+		return name.hashCode();
+	}
+
+	@Override
+	public boolean equals(@Nullable final Object o) {
+
+		if (o == null || !Module.class.equals(o.getClass())) {
+			return false;
+		}
+
+		return name.equals(((Module) o).name);
+	}
+
+	@Override
+	public String toString() {
+
+		return name;
 	}
 }
