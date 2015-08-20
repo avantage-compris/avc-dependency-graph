@@ -50,18 +50,6 @@ public class JenkinsDependencyGraphTest {
 				file.getName().replace(".xml", ".svg")));
 	}
 
-	@Test
-	public void testJenkinsDependencyGraph_001() throws Exception {
-
-		generateDependencyGraph(new File("src/test/xml", "jobsConfig-001.xml"));
-	}
-
-	@Test
-	public void testJenkinsDependencyGraph_002() throws Exception {
-
-		generateDependencyGraph(new File("src/test/xml", "jobsConfig-002.xml"));
-	}
-
 	@XPath("/jobConfigs")
 	private interface JobXMLConfigs {
 
@@ -96,5 +84,23 @@ public class JenkinsDependencyGraphTest {
 
 		@XPath("upstreamProject")
 		Job[] getUpstreamProjects();
+	}
+
+	@Test
+	public void testJenkinsDependencyGraph_001() throws Exception {
+
+		generateDependencyGraph(new File("src/test/xml", "jobsConfig-001.xml"));
+	}
+
+	@Test
+	public void testJenkinsDependencyGraph_002() throws Exception {
+
+		generateDependencyGraph(new File("src/test/xml", "jobsConfig-002.xml"));
+	}
+
+	@Test
+	public void testJenkinsDependencyGraph_003() throws Exception {
+
+		generateDependencyGraph(new File("src/test/xml", "jobsConfig-003.xml"));
 	}
 }

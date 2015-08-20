@@ -1,0 +1,119 @@
+<jobConfigs>
+	<jobConfig jobName="gco-parent">
+		<name>gco-parent</name>
+		<downstreamProject>
+			<name>avc-common-parent</name>
+		</downstreamProject>
+		<downstreamProject>
+			<name>avc-common</name>
+		</downstreamProject>
+	</jobConfig>
+	<jobConfig jobName="avc-work-parent">
+		<name>avc-work-parent</name>
+		<downstreamProject>
+			<name>avc-commons-databeans</name>
+		</downstreamProject>
+		<downstreamProject>
+			<name>avc-plugin-common</name>
+		</downstreamProject>
+	</jobConfig>
+	<jobConfig jobName="avc-common-parent">
+		<name>avc-common-parent</name>
+		<downstreamProject>
+			<name>avc-common-http</name>
+		</downstreamProject>
+		<downstreamProject>
+			<name>avc-common-htmlparse</name>
+		</downstreamProject>
+		<downstreamProject>
+			<name>avc-common-httpclient</name>
+		</downstreamProject>
+		<downstreamProject>
+			<name>avci-parent</name>
+		</downstreamProject>
+	</jobConfig>
+	<jobConfig jobName="avc-commons-databeans">
+		<name>avc-commons-databeans</name>
+		<downstreamProject>
+			<name>avc-common</name>
+		</downstreamProject>
+	</jobConfig>
+	<jobConfig jobName="avc-plugin-common">
+		<name>avc-plugin-common</name>
+		<downstreamProject>
+			<name>avc-plugin-parent</name>
+		</downstreamProject>
+	</jobConfig>
+	<jobConfig jobName="avc-common">
+		<name>avc-common</name>
+		<downstreamProject>
+			<name>avc-common-http</name>
+		</downstreamProject>
+		<downstreamProject>
+			<name>avc-common-httpclient</name>
+		</downstreamProject>
+		<downstreamProject>
+			<name>avc-common-testutil</name>
+		</downstreamProject>
+		<downstreamProject>
+			<name>avc-xmldata-core</name>
+		</downstreamProject>
+	</jobConfig>
+	<jobConfig jobName="avc-plugin-parent">
+		<name>avc-plugin-parent</name>
+		<downstreamProject>
+			<name>avc-common-testutil</name>
+		</downstreamProject>
+		<downstreamProject>
+			<name>avc-common-plugin-parent</name>
+		</downstreamProject>
+	</jobConfig>
+	<jobConfig jobName="avc-common-http">
+		<name>avc-common-http</name>
+	</jobConfig>
+	<jobConfig jobName="avc-common-httpclient">
+		<name>avc-common-httpclient</name>
+	</jobConfig>
+	<jobConfig jobName="avc-common-testutil">
+		<name>avc-common-testutil</name>
+		<downstreamProject>
+			<name>avc-common-htmlparse</name>
+		</downstreamProject>
+		<downstreamProject>
+			<name>avci-parent</name>
+		</downstreamProject>
+		<downstreamProject>
+			<name>avc-marshalling</name>
+		</downstreamProject>
+	</jobConfig>
+	<jobConfig jobName="avc-xmldata-core">
+		<name>avc-xmldata-core</name>
+		<downstreamProject>
+			<name>avc-xmldata-testutil</name>
+		</downstreamProject>
+	</jobConfig>
+	<jobConfig jobName="avc-common-plugin-parent">
+		<name>avc-common-plugin-parent</name>
+	</jobConfig>
+	<jobConfig jobName="avc-common-htmlparse">
+		<name>avc-common-htmlparse</name>
+	</jobConfig>
+	<jobConfig jobName="avci-parent">
+		<name>avci-parent</name>
+	</jobConfig>
+	<jobConfig jobName="avc-marshalling">
+		<name>avc-marshalling</name>
+		<downstreamProject>
+			<name>avc-xmldata</name>
+		</downstreamProject>
+	</jobConfig>
+	<jobConfig jobName="avc-xmldata-testutil">
+		<name>avc-xmldata-testutil</name>
+		<downstreamProject>
+			<name>avc-xmldata</name>
+		</downstreamProject>
+	</jobConfig>
+	<jobConfig jobName="avc-xmldata">
+		<name>avc-xmldata</name>
+	</jobConfig>
+</jobConfigs>
