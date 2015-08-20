@@ -16,7 +16,8 @@ import org.junit.Test;
 
 public class JenkinsDependencyGraphTest {
 
-	private static ModulePosition[] generateDependencyGraph(final File file) throws Exception {
+	private static ModulePosition[] generateDependencyGraph(
+			final long optimizeTimeoutMs, final File file) throws Exception {
 
 		// 1. LOAD CONFIGS
 
@@ -47,10 +48,8 @@ public class JenkinsDependencyGraphTest {
 
 		// 3. SVG OUTPUT
 
-		final boolean optimize = true;
-
-		return new DependencyDiagrammer(analysis).drawTo(optimize, new File(
-				"target", file.getName().replace(".xml", ".svg")));
+		return new DependencyDiagrammer(analysis).drawTo(optimizeTimeoutMs,
+				new File("target", file.getName().replace(".xml", ".svg")));
 	}
 
 	@XPath("/jobConfigs")
@@ -110,8 +109,8 @@ public class JenkinsDependencyGraphTest {
 	@Test
 	public void testJenkinsDependencyGraph_001() throws Exception {
 
-		final ModulePosition[] positions = generateDependencyGraph(new File(
-				"src/test/xml", "jobsConfig-001.xml"));
+		final ModulePosition[] positions = generateDependencyGraph(-1,
+				new File("src/test/xml", "jobsConfig-001.xml"));
 
 		assertEquals(16, positions.length);
 
@@ -134,10 +133,62 @@ public class JenkinsDependencyGraphTest {
 	}
 
 	@Test
+	public void testJenkinsDependencyGraph_001_timeout120s() throws Exception {
+
+		final ModulePosition[] positions = generateDependencyGraph(120000L,
+				new File("src/test/xml", "jobsConfig-001.xml"));
+
+		assertEquals(16, positions.length);
+
+		assertModulePosition(positions, 1, 0, "aed-parent");
+		assertModulePosition(positions, 0, 1, "aed-web");
+		assertModulePosition(positions, 1, 1, "aed-dockerfile-testutil");
+		assertModulePosition(positions, 2, 1, "aed-sysadmin");
+		assertModulePosition(positions, 3, 1, "aed-common");
+		assertModulePosition(positions, 1, 2, "aed-base-dockerfile");
+		assertModulePosition(positions, 3, 2, "aed-api-common");
+		assertModulePosition(positions, 4, 2, "aed-workers-common");
+		assertModulePosition(positions, 0, 3, "aed-web-dockerfile");
+		assertModulePosition(positions, 1, 3, "aed-mq0-dockerfile");
+		assertModulePosition(positions, 2, 3, "aed-data0-dockerfile");
+		assertModulePosition(positions, 3, 3, "aed-monitoring-api");
+		assertModulePosition(positions, 4, 3, "aed-monitoring-workers");
+		assertModulePosition(positions, 0, 4, "aed-web-it");
+		assertModulePosition(positions, 3, 4, "aed-monitoring-web");
+		assertModulePosition(positions, 2, 5, "aed-monitoring-dockerfile");
+	}
+
+	@Test
+	public void testJenkinsDependencyGraph_001_timeout1ms() throws Exception {
+
+		final ModulePosition[] positions = generateDependencyGraph(1, new File(
+				"src/test/xml", "jobsConfig-001.xml"));
+
+		assertEquals(16, positions.length);
+
+		assertModulePosition(positions, 0, 0, "aed-parent");
+		assertModulePosition(positions, 0, 1, "aed-sysadmin");
+		assertModulePosition(positions, 1, 1, "aed-dockerfile-testutil");
+		assertModulePosition(positions, 2, 1, "aed-web");
+		assertModulePosition(positions, 3, 1, "aed-common");
+		assertModulePosition(positions, 0, 2, "aed-base-dockerfile");
+		assertModulePosition(positions, 1, 2, "aed-api-common");
+		assertModulePosition(positions, 2, 2, "aed-workers-common");
+		assertModulePosition(positions, 0, 3, "aed-data0-dockerfile");
+		assertModulePosition(positions, 1, 3, "aed-web-dockerfile");
+		assertModulePosition(positions, 2, 3, "aed-monitoring-workers");
+		assertModulePosition(positions, 3, 3, "aed-monitoring-api");
+		assertModulePosition(positions, 4, 3, "aed-mq0-dockerfile");
+		assertModulePosition(positions, 0, 4, "aed-web-it");
+		assertModulePosition(positions, 1, 4, "aed-monitoring-web");
+		assertModulePosition(positions, 0, 5, "aed-monitoring-dockerfile");
+	}
+
+	@Test
 	public void testJenkinsDependencyGraph_002() throws Exception {
 
-		final ModulePosition[] positions = generateDependencyGraph(new File(
-				"src/test/xml", "jobsConfig-002.xml"));
+		final ModulePosition[] positions = generateDependencyGraph(-1,
+				new File("src/test/xml", "jobsConfig-002.xml"));
 
 		assertEquals(10, positions.length);
 
@@ -154,10 +205,30 @@ public class JenkinsDependencyGraphTest {
 	}
 
 	@Test
+	public void testJenkinsDependencyGraph_002_dontOptimize() throws Exception {
+
+		final ModulePosition[] positions = generateDependencyGraph(0, new File(
+				"src/test/xml", "jobsConfig-002.xml"));
+
+		assertEquals(10, positions.length);
+
+		assertModulePosition(positions, 0, 0, "avc-dbqueries");
+		assertModulePosition(positions, 1, 0, "avc-webapp-it-commons");
+		assertModulePosition(positions, 2, 0, "avc-manifest-commons");
+		assertModulePosition(positions, 0, 1, "avc-webapp-scenarios-plugin");
+		assertModulePosition(positions, 1, 1, "avc-core-commons");
+		assertModulePosition(positions, 2, 1, "avc-node-commons");
+		assertModulePosition(positions, 0, 2, "avc-dbdescribe");
+		assertModulePosition(positions, 1, 2, "avc-webapp-commons");
+		assertModulePosition(positions, 2, 2, "avc-workers-commons");
+		assertModulePosition(positions, 0, 3, "avc-workers-plugin");
+	}
+
+	@Test
 	public void testJenkinsDependencyGraph_003() throws Exception {
 
-		final ModulePosition[] positions = generateDependencyGraph(new File(
-				"src/test/xml", "jobsConfig-003.xml"));
+		final ModulePosition[] positions = generateDependencyGraph(-1,
+				new File("src/test/xml", "jobsConfig-003.xml"));
 
 		assertEquals(17, positions.length);
 

@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicStampedReference;
 
 import javax.annotation.Nullable;
@@ -53,14 +54,29 @@ public class DependencyDiagrammer {
 			}
 		}
 
-		return maxModuleCountOnAnyLevel + 1; // Always give more room
+		if (maxModuleCountOnAnyLevel < 4) {
+
+			return maxModuleCountOnAnyLevel + 1; // give more room
+
+		} else {
+
+			return maxModuleCountOnAnyLevel;
+		}
 	}
 
 	private static final int WIDTH = 150; // TODO parameterize this
 	private static final int HEIGHT = 20;
 	private static final int V_SPACE = 40;
 
-	public ModulePosition[] drawTo(final boolean optimize, final File svgFile) throws IOException {
+	/**
+	 * output the SVG diagram to a file.
+	 * 
+	 * @param optimizeTimeoutMs if <tt>0</tt>, don’t try to optimize the
+	 * diagram; If positive, will try to optimize the diagram for a maximum
+	 * amount of milliseconds; If negative (<tt>-1</tt>), will not timeout.
+	 */
+	public ModulePosition[] drawTo(final long optimizeTimeoutMs,
+			final File svgFile) throws IOException {
 
 		final Set<ModulePosition> result = new HashSet<ModulePosition>();
 
@@ -138,8 +154,8 @@ public class DependencyDiagrammer {
 
 				System.out.println(metrics);
 
-				final Map<String, ModulePositionImpl> modulePoss2 = optimize ? attainMinimumMetrics(modulePoss)
-						: modulePoss;
+				final Map<String, ModulePositionImpl> modulePoss2 = (optimizeTimeoutMs != 0) ? attainMinimumMetrics(
+						optimizeTimeoutMs, modulePoss) : modulePoss;
 
 				final DiagramMetrics metrics2 = calculateMetrics(modulePoss2);
 
@@ -620,6 +636,7 @@ public class DependencyDiagrammer {
 	}
 
 	private Map<String, ModulePositionImpl> attainMinimumMetrics(
+			final long optimizeTimeoutMs,
 			final Map<String, ModulePositionImpl> modulePoss) {
 
 		final AtomicStampedReference<DiagramMetrics> metrics = new AtomicStampedReference<DiagramMetrics>(
@@ -653,7 +670,22 @@ public class DependencyDiagrammer {
 
 		final Integer[][] posGrid = new Integer[levelCount][maxModuleCountOnAnyLevel];
 
-		parse(modulePosArray, posGrid, 0, 0, metrics, placeHolder);
+		final long maxSystemTimeMs = optimizeTimeoutMs <= 0 ? 0L : (System
+				.currentTimeMillis() + optimizeTimeoutMs);
+
+		count = 0;
+
+		try {
+
+			parse(maxSystemTimeMs, modulePosArray, posGrid, 0, 0, metrics,
+					placeHolder);
+
+		} catch (final TimeoutException e) {
+
+			System.err.println("Timeout.");
+		}
+
+		System.out.println(count + ". Done.");
 
 		return placeHolder.getReference();
 	}
@@ -665,12 +697,19 @@ public class DependencyDiagrammer {
 	private long next = System.currentTimeMillis() + DELAY;
 
 	private void parse(
+			final long maxSystemTimeMs,
 			final ModulePositionImpl[][] modulePosArray,
 			final Integer[][] posGrid,
 			final int level,
 			final int i,
 			final AtomicStampedReference<DiagramMetrics> metrics,
-			final AtomicStampedReference<Map<String, ModulePositionImpl>> placeHolder) {
+			final AtomicStampedReference<Map<String, ModulePositionImpl>> placeHolder) throws TimeoutException {
+
+		if (maxSystemTimeMs != 0
+				&& System.currentTimeMillis() > maxSystemTimeMs) {
+
+			throw new TimeoutException(); // timeout
+		}
 
 		if (level >= levelCount) {
 
@@ -705,34 +744,13 @@ public class DependencyDiagrammer {
 
 			final DiagramMetrics metrics2 = calculateMetrics(modulePoss2);
 
-			final int[] metricsStamp = new int[1];
+			if (metrics2.isBetterThan(metrics.getReference())) {
 
-			synchronized (placeHolder) {
+				System.out.println(metrics2);
 
-				while (true) {
+				metrics.set(metrics2, metrics.getStamp() + 1);
 
-					final DiagramMetrics metrics0 = metrics.get(metricsStamp);
-
-					if (metrics2.isBetterThan(metrics0)) {
-
-						final boolean compareAndSet = metrics.compareAndSet(
-								metrics0, metrics2, metricsStamp[0],
-								metricsStamp[0] + 1);
-
-						if (!compareAndSet) {
-
-							continue;
-						}
-
-						System.out.println(metrics2);
-
-						final int placeHolderStamp = placeHolder.getStamp();
-
-						placeHolder.set(modulePoss2, placeHolderStamp + 2);
-					}
-
-					break;
-				}
+				placeHolder.set(modulePoss2, placeHolder.getStamp() + 1);
 			}
 
 			return;
@@ -740,7 +758,8 @@ public class DependencyDiagrammer {
 
 		if (i >= maxModuleCountOnAnyLevel) {
 
-			parse(modulePosArray, posGrid, level + 1, 0, metrics, placeHolder);
+			parse(maxSystemTimeMs, modulePosArray, posGrid, level + 1, 0,
+					metrics, placeHolder);
 
 			return;
 		}
@@ -813,7 +832,8 @@ public class DependencyDiagrammer {
 
 			posGrid[level][i] = (r == -1) ? null : r;
 
-			parse(modulePosArray, posGrid, level, i + 1, metrics, placeHolder);
+			parse(maxSystemTimeMs, modulePosArray, posGrid, level, i + 1,
+					metrics, placeHolder);
 		}
 	}
 }
