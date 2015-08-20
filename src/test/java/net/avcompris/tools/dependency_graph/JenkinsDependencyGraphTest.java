@@ -10,7 +10,6 @@ import java.util.Set;
 
 import net.avcompris.binding.annotation.XPath;
 import net.avcompris.binding.dom.helper.DomBinderUtils;
-import net.avcompris.tools.dependency_graph.DependencyDiagrammer.ModulePosition;
 import net.avcompris.tools.dependency_graph.JenkinsDependencyGraphTest.JenkinsXMLConfig.Job;
 
 import org.junit.Test;
@@ -95,12 +94,12 @@ public class JenkinsDependencyGraphTest {
 
 		for (final ModulePosition position : positions) {
 
-			if (!moduleName.equals(position.moduleName)) {
+			if (!moduleName.equals(position.getModuleName())) {
 				continue;
 			}
 
-			assertEquals(moduleName + ".x", 10 + x * 160, position.x);
-			assertEquals(moduleName + ".y", 10 + y * 60, position.y);
+			assertEquals(moduleName + ".x", 10 + x * 160, position.getX());
+			assertEquals(moduleName + ".y", 10 + y * 60, position.getY());
 
 			return;
 		}

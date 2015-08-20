@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicStampedReference;
 
 import javax.annotation.Nullable;
 
@@ -80,7 +81,7 @@ public class DependencyDiagrammer {
 			@Override
 			protected void body() throws Exception {
 
-				final Map<String, ModulePosition> modulePoss = new HashMap<String, ModulePosition>();
+				final Map<String, ModulePositionImpl> modulePoss = new HashMap<String, ModulePositionImpl>();
 
 				int y = 10;
 
@@ -93,7 +94,7 @@ public class DependencyDiagrammer {
 
 					for (final String moduleName : modulesOnLevel) {
 
-						final ModulePosition modulePos = new ModulePosition(
+						final ModulePositionImpl modulePos = new ModulePositionImpl(
 								moduleName, x, y, WIDTH, HEIGHT);
 
 						modulePoss.put(moduleName, modulePos);
@@ -108,7 +109,8 @@ public class DependencyDiagrammer {
 
 				loop: do {
 
-					for (final ModulePosition modulePos : modulePoss.values()) {
+					for (final ModulePositionImpl modulePos : modulePoss
+							.values()) {
 
 						final Collection<String> upstreams = analysis
 								.getDirectUpstreams(modulePos.moduleName);
@@ -126,10 +128,10 @@ public class DependencyDiagrammer {
 							continue;
 						}
 
-						final ModulePosition upstreamPosition = modulePoss
+						final ModulePositionImpl upstreamPosition = modulePoss
 								.get(upstream);
 
-						final ModulePosition current = getModulePositionAtXY(
+						final ModulePositionImpl current = getModulePositionAtXY(
 								modulePoss, upstreamPosition.x, modulePos.y);
 
 						if (current != null && current != modulePos) {
@@ -148,7 +150,7 @@ public class DependencyDiagrammer {
 
 				System.out.println(metrics);
 
-				final Map<String, ModulePosition> modulePoss2 = optimize ? attainMinimumMetrics(modulePoss)
+				final Map<String, ModulePositionImpl> modulePoss2 = optimize ? attainMinimumMetrics(modulePoss)
 						: modulePoss;
 
 				final DiagramMetrics metrics2 = calculateMetrics(modulePoss2);
@@ -159,7 +161,7 @@ public class DependencyDiagrammer {
 
 				// 9.1. RECTS
 
-				for (final ModulePosition modulePos : modulePoss2.values()) {
+				for (final ModulePositionImpl modulePos : modulePoss2.values()) {
 
 					result.add(modulePos);
 
@@ -196,11 +198,11 @@ public class DependencyDiagrammer {
 	}
 
 	@Nullable
-	private static ModulePosition getModulePositionAtXY(
-			final Map<String, ModulePosition> modulePoss, final int x,
+	private static ModulePositionImpl getModulePositionAtXY(
+			final Map<String, ModulePositionImpl> modulePoss, final int x,
 			final int y) {
 
-		for (final ModulePosition modulePos : modulePoss.values()) {
+		for (final ModulePositionImpl modulePos : modulePoss.values()) {
 
 			if (modulePos.x == x && modulePos.y == y) {
 
@@ -212,28 +214,29 @@ public class DependencyDiagrammer {
 	}
 
 	private static void swapModulePositions(
-			final Map<String, ModulePosition> modulePoss,
-			final ModulePosition modulePos1, final ModulePosition modulePos2) {
+			final Map<String, ModulePositionImpl> modulePoss,
+			final ModulePositionImpl modulePos1,
+			final ModulePositionImpl modulePos2) {
 
-		modulePoss.put(modulePos1.moduleName, new ModulePosition(
+		modulePoss.put(modulePos1.moduleName, new ModulePositionImpl(
 				modulePos1.moduleName, modulePos2));
 
-		modulePoss.put(modulePos2.moduleName, new ModulePosition(
+		modulePoss.put(modulePos2.moduleName, new ModulePositionImpl(
 				modulePos2.moduleName, modulePos1));
 	}
 
-	public static class ModulePosition {
+	private static class ModulePositionImpl implements ModulePosition {
 
 		public final String moduleName;
 		public final int x;
 		public final int y;
 		public final int width;
 		public final int height;
-		private final int middleX;
-		private final int top;
-		private final int bottom;
+		public final int middleX;
+		public final int top;
+		public final int bottom;
 
-		private ModulePosition(
+		private ModulePositionImpl(
 				final String moduleName,
 				final int x,
 				final int y,
@@ -251,15 +254,17 @@ public class DependencyDiagrammer {
 			bottom = y + height;
 		}
 
-		public ModulePosition(
+		public ModulePositionImpl(
 				final String moduleName,
-				final ModulePosition modulePos2) {
+				final ModulePositionImpl modulePos2) {
 
 			this(moduleName, modulePos2.x, modulePos2.y, modulePos2.width,
 					modulePos2.height);
 		}
 
-		public ModulePosition(final ModulePosition modulePos2, final int x) {
+		public ModulePositionImpl(
+				final ModulePositionImpl modulePos2,
+				final int x) {
 
 			this(modulePos2.moduleName, x, modulePos2.y, modulePos2.width,
 					modulePos2.height);
@@ -274,11 +279,11 @@ public class DependencyDiagrammer {
 		@Override
 		public boolean equals(@Nullable final Object o) {
 
-			if (o == null || !ModulePosition.class.equals(o)) {
+			if (o == null || !ModulePositionImpl.class.equals(o)) {
 				return false;
 			}
 
-			return moduleName.equals(((ModulePosition) o).moduleName);
+			return moduleName.equals(((ModulePositionImpl) o).moduleName);
 		}
 
 		@Override
@@ -286,10 +291,28 @@ public class DependencyDiagrammer {
 
 			return moduleName;
 		}
+
+		@Override
+		public String getModuleName() {
+
+			return moduleName;
+		}
+
+		@Override
+		public int getX() {
+
+			return x;
+		}
+
+		@Override
+		public int getY() {
+
+			return y;
+		}
 	}
 
 	private DiagramMetrics calculateMetrics(
-			final Map<String, ModulePosition> modulePoss) {
+			final Map<String, ModulePositionImpl> modulePoss) {
 
 		int howManyLinesCross = 0;
 		double slopeScore = 0.0;
@@ -519,18 +542,18 @@ public class DependencyDiagrammer {
 	}
 
 	private Iterable<Line> calculateLines(
-			final Map<String, ModulePosition> modulePoss) {
+			final Map<String, ModulePositionImpl> modulePoss) {
 
 		final List<Line> lines = new ArrayList<Line>();
 
-		for (final ModulePosition modulePos : modulePoss.values()) {
+		for (final ModulePositionImpl modulePos : modulePoss.values()) {
 
 			final String moduleName = modulePos.moduleName;
 
 			for (final String upstream : analysis
 					.getDirectUpstreams(moduleName)) {
 
-				final ModulePosition upstreamPosition = modulePoss
+				final ModulePositionImpl upstreamPosition = modulePoss
 						.get(upstream);
 
 				lines.add(new Line(modulePos.middleX, modulePos.top,
@@ -608,14 +631,13 @@ public class DependencyDiagrammer {
 		}
 	}
 
-	private Map<String, ModulePosition> attainMinimumMetrics(
-			final Map<String, ModulePosition> modulePoss) {
+	private Map<String, ModulePositionImpl> attainMinimumMetrics(
+			final Map<String, ModulePositionImpl> modulePoss) {
 
-		final DiagramMetrics[] metrics = new DiagramMetrics[]{
-			calculateMetrics(modulePoss)
-		};
+		final AtomicStampedReference<DiagramMetrics> metrics = new AtomicStampedReference<DiagramMetrics>(
+				calculateMetrics(modulePoss), 0);
 
-		final ModulePosition[][] modulePosArray = new ModulePosition[levelCount][];
+		final ModulePositionImpl[][] modulePosArray = new ModulePositionImpl[levelCount][];
 
 		int i = 0;
 
@@ -624,7 +646,7 @@ public class DependencyDiagrammer {
 
 			final int moduleCountOnThisLevel = modulesOnLevel.size();
 
-			modulePosArray[i] = new ModulePosition[moduleCountOnThisLevel];
+			modulePosArray[i] = new ModulePositionImpl[moduleCountOnThisLevel];
 
 			int j = 0;
 
@@ -638,15 +660,14 @@ public class DependencyDiagrammer {
 			++i;
 		}
 
-		final List<Map<String, ModulePosition>> placeHolder = new ArrayList<Map<String, ModulePosition>>();
-
-		placeHolder.add(modulePoss);
+		final AtomicStampedReference<Map<String, ModulePositionImpl>> placeHolder = new AtomicStampedReference<Map<String, ModulePositionImpl>>(
+				modulePoss, 0);
 
 		final Integer[][] posGrid = new Integer[levelCount][maxModuleCountOnAnyLevel];
 
 		parse(modulePosArray, posGrid, 0, 0, metrics, placeHolder);
 
-		return placeHolder.iterator().next();
+		return placeHolder.getReference();
 	}
 
 	private int count = 0;
@@ -655,10 +676,13 @@ public class DependencyDiagrammer {
 
 	private long next = System.currentTimeMillis() + DELAY;
 
-	private void parse(final ModulePosition[][] modulePosArray,
-			final Integer[][] posGrid, final int level, final int i,
-			final DiagramMetrics[] metrics,
-			final List<Map<String, ModulePosition>> placeHolder) {
+	private void parse(
+			final ModulePositionImpl[][] modulePosArray,
+			final Integer[][] posGrid,
+			final int level,
+			final int i,
+			final AtomicStampedReference<DiagramMetrics> metrics,
+			final AtomicStampedReference<Map<String, ModulePositionImpl>> placeHolder) {
 
 		if (level >= levelCount) {
 
@@ -671,7 +695,7 @@ public class DependencyDiagrammer {
 				next = System.currentTimeMillis() + DELAY;
 			}
 
-			final Map<String, ModulePosition> modulePoss2 = new HashMap<String, ModulePosition>();
+			final Map<String, ModulePositionImpl> modulePoss2 = new HashMap<String, ModulePositionImpl>();
 
 			for (int y = 0; y < levelCount; ++y) {
 
@@ -683,22 +707,44 @@ public class DependencyDiagrammer {
 						continue;
 					}
 
-					final ModulePosition modulePos = modulePosArray[y][pos];
+					final ModulePositionImpl modulePos = modulePosArray[y][pos];
 
-					modulePoss2.put(modulePos.moduleName, new ModulePosition(
-							modulePos, 10 + x * (WIDTH + 10)));
+					modulePoss2.put(modulePos.moduleName,
+							new ModulePositionImpl(modulePos, 10 + x
+									* (WIDTH + 10)));
 				}
 			}
 
 			final DiagramMetrics metrics2 = calculateMetrics(modulePoss2);
 
-			if (metrics2.isBetterThan(metrics[0])) {
+			final int[] metricsStamp = new int[1];
 
-				System.out.println(metrics2);
+			synchronized (placeHolder) {
 
-				placeHolder.set(0, modulePoss2);
+				while (true) {
 
-				metrics[0] = metrics2;
+					final DiagramMetrics metrics0 = metrics.get(metricsStamp);
+
+					if (metrics2.isBetterThan(metrics0)) {
+
+						final boolean compareAndSet = metrics.compareAndSet(
+								metrics0, metrics2, metricsStamp[0],
+								metricsStamp[0] + 1);
+
+						if (!compareAndSet) {
+
+							continue;
+						}
+
+						System.out.println(metrics2);
+
+						final int placeHolderStamp = placeHolder.getStamp();
+
+						placeHolder.set(modulePoss2, placeHolderStamp + 2);
+					}
+
+					break;
+				}
 			}
 
 			return;
@@ -711,7 +757,7 @@ public class DependencyDiagrammer {
 			return;
 		}
 
-		final Map<String, ModulePosition> partialModulePositions = new HashMap<String, ModulePosition>();
+		final Map<String, ModulePositionImpl> partialModulePositions = new HashMap<String, ModulePositionImpl>();
 
 		for (int y = 0; y <= level; ++y) {
 
@@ -728,10 +774,11 @@ public class DependencyDiagrammer {
 					continue;
 				}
 
-				final ModulePosition modulePos = modulePosArray[y][pos];
+				final ModulePositionImpl modulePos = modulePosArray[y][pos];
 
-				partialModulePositions.put(modulePos.moduleName,
-						new ModulePosition(modulePos, 10 + x * (WIDTH + 10)));
+				partialModulePositions
+						.put(modulePos.moduleName, new ModulePositionImpl(
+								modulePos, 10 + x * (WIDTH + 10)));
 			}
 		}
 
@@ -740,7 +787,7 @@ public class DependencyDiagrammer {
 		// Perform the recursive parsing only if we have hope that it 
 		// will be better than what we already have.
 
-		if (metrics[0].hasLessLineCrossingsThan(partialMetrics)) {
+		if (metrics.getReference().hasLessLineCrossingsThan(partialMetrics)) {
 
 			return;
 		}
@@ -773,8 +820,6 @@ public class DependencyDiagrammer {
 
 			remaining.add(-1);
 		}
-
-		// TODO multithread: ThreadPool(10), for instance
 
 		for (final Integer r : remaining) {
 
