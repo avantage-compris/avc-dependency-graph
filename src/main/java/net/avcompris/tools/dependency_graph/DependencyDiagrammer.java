@@ -53,19 +53,7 @@ public class DependencyDiagrammer {
 			}
 		}
 
-		switch (maxModuleCountOnAnyLevel) {
-
-		case 0:
-		case 1:
-		case 2:
-		case 3:
-
-			return maxModuleCountOnAnyLevel + 1; // give more room
-
-		default:
-
-			return maxModuleCountOnAnyLevel;
-		}
+		return maxModuleCountOnAnyLevel + 1; // Always give more room
 	}
 
 	private static final int WIDTH = 150; // TODO parameterize this
