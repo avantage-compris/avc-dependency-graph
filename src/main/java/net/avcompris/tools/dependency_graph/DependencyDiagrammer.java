@@ -7,14 +7,17 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.Nullable;
 
 import net.avcompris.tools.diagrammer.SVGDiagrammer;
 
 import com.avcompris.lang.NotImplementedException;
+import com.google.common.collect.Iterables;
 
 public class DependencyDiagrammer {
 
@@ -68,7 +71,9 @@ public class DependencyDiagrammer {
 	private static final int HEIGHT = 20;
 	private static final int V_SPACE = 40;
 
-	public void drawTo(final boolean optimize, final File svgFile) throws IOException {
+	public ModulePosition[] drawTo(final boolean optimize, final File svgFile) throws IOException {
+
+		final Set<ModulePosition> result = new HashSet<ModulePosition>();
 
 		new SVGDiagrammer() {
 
@@ -156,6 +161,8 @@ public class DependencyDiagrammer {
 
 				for (final ModulePosition modulePos : modulePoss2.values()) {
 
+					result.add(modulePos);
+
 					final String moduleName = modulePos.moduleName;
 
 					rect().x(modulePos.x - 0.5).y(modulePos.y - 0.5)
@@ -182,6 +189,10 @@ public class DependencyDiagrammer {
 				.printToSystemOut(false)
 				.run(10 + maxModuleCountOnAnyLevel * (WIDTH + 10),
 						20 + levelCount * HEIGHT + (levelCount - 1) * V_SPACE);
+
+		// END
+
+		return Iterables.toArray(result, ModulePosition.class);
 	}
 
 	@Nullable
@@ -211,18 +222,18 @@ public class DependencyDiagrammer {
 				modulePos2.moduleName, modulePos1));
 	}
 
-	private static class ModulePosition {
+	public static class ModulePosition {
 
 		public final String moduleName;
 		public final int x;
 		public final int y;
 		public final int width;
 		public final int height;
-		public final int middleX;
-		public final int top;
-		public final int bottom;
+		private final int middleX;
+		private final int top;
+		private final int bottom;
 
-		public ModulePosition(
+		private ModulePosition(
 				final String moduleName,
 				final int x,
 				final int y,
@@ -252,6 +263,28 @@ public class DependencyDiagrammer {
 
 			this(modulePos2.moduleName, x, modulePos2.y, modulePos2.width,
 					modulePos2.height);
+		}
+
+		@Override
+		public int hashCode() {
+
+			return moduleName.hashCode();
+		}
+
+		@Override
+		public boolean equals(@Nullable final Object o) {
+
+			if (o == null || !ModulePosition.class.equals(o)) {
+				return false;
+			}
+
+			return moduleName.equals(((ModulePosition) o).moduleName);
+		}
+
+		@Override
+		public String toString() {
+
+			return moduleName;
 		}
 	}
 
