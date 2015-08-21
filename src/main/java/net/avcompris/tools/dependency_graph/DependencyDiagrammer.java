@@ -71,9 +71,9 @@ public class DependencyDiagrammer {
 	/**
 	 * output the SVG diagram to a file.
 	 * 
-	 * @param optimizeTimeoutMs if <tt>0</tt>, don’t try to optimize the
+	 * @param optimizeTimeoutMs if <tt>0L</tt>, don’t try to optimize the
 	 * diagram; If positive, will try to optimize the diagram for a maximum
-	 * amount of milliseconds; If negative (<tt>-1</tt>), will not timeout.
+	 * amount of milliseconds; If negative (<tt>-1L</tt>), will not timeout.
 	 */
 	public ModulePosition[] drawTo(final long optimizeTimeoutMs,
 			final File svgFile) throws IOException {
