@@ -493,12 +493,12 @@ public class DependencyDiagrammer {
 
 	private static class DiagramMetrics {
 
-		public final double howManyLinesCross;
+		public final int howManyLinesCross;
 		public final double slopeScore;
 		public final double xWeight;
 
 		public DiagramMetrics(
-				final double howManyLinesCross,
+				final int howManyLinesCross,
 				final double slopeScore,
 				final double xWeight) {
 
